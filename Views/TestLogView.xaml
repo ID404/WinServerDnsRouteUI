@@ -1,1 +1,127 @@
+<UserControl x:Class="DnsRouteUI.Views.TestLogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="White">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="16">
+            <TextBlock Text="测试与日志" Style="{StaticResource SectionHeader}" FontSize="18" />
+            <TextBlock Text="规格第 5.6 节：输入测试客户端 IP 与域名，输出命中的规则、配置档、缓存范围、上游 DNS、查询结果。" Foreground="#666" Margin="0,0,0,12" />
 
+            <!-- 测试输入 -->
+            <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Padding="12" Margin="0,0,0,12">
+                <StackPanel>
+                    <TextBlock Text="测试输入" Style="{StaticResource SectionHeader}" />
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="120" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="测试客户端 IP" Foreground="#555" />
+                            <TextBox Text="{Binding ClientIp, UpdateSourceTrigger=PropertyChanged}" FontFamily="Consolas" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="待解析域名" Foreground="#555" />
+                            <TextBox Text="{Binding Domain, UpdateSourceTrigger=PropertyChanged}" FontFamily="Consolas" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="记录类型" Foreground="#555" />
+                            <TextBox Text="{Binding RecordType, UpdateSourceTrigger=PropertyChanged}" FontFamily="Consolas" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="3" VerticalAlignment="Bottom">
+                            <Button Content="执行测试" Command="{Binding RunTestCommand}" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- 测试结果 -->
+            <TextBlock Text="测试结果" Style="{StaticResource SectionHeader}" />
+            <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Padding="12">
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Result}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="命中的规则/策略" Foreground="#555" Margin="0,4" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Result.MatchedRule}" Margin="0,4" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="是否默认策略" Foreground="#555" Margin="0,4" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Result.IsDefaultPolicy}" Margin="0,4" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="上游解析配置档" Foreground="#555" Margin="0,4" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Result.ResolverProfile, TargetNullValue=-}" Margin="0,4" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="预计缓存范围" Foreground="#555" Margin="0,4" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Result.CacheScope, TargetNullValue=-}" Margin="0,4" FontFamily="Consolas" />
+
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="预计上游 DNS" Foreground="#555" Margin="0,4" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding Result.UpstreamDns, TargetNullValue=-}" Margin="0,4" FontFamily="Consolas" />
+
+                        <TextBlock Grid.Row="5" Grid.Column="0" Text="缓存状态" Foreground="#555" Margin="0,4" />
+                        <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding Result.CacheStatus, TargetNullValue=-}" Margin="0,4" />
+                    </Grid>
+
+                    <TextBlock Text="DNS 查询结果" Style="{StaticResource SectionHeader}" />
+                    <TextBox Text="{Binding Result.QueryResult, Mode=OneWay, TargetNullValue=（无）}" IsReadOnly="True"
+                             FontFamily="Consolas" FontSize="12" Height="160"
+                             VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                             TextWrapping="NoWrap" />
+
+                    <TextBlock Text="错误详情">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource SectionHeader}">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Setter Property="Foreground" Value="#B00020" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Result.Error}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBox Text="{Binding Result.Error, Mode=OneWay}" IsReadOnly="True"
+                             Foreground="#B00020" FontFamily="Consolas" FontSize="12" Height="80"
+                             VerticalScrollBarVisibility="Auto" TextWrapping="Wrap">
+                        <TextBox.Style>
+                            <Style TargetType="TextBox">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Result.Error}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBox.Style>
+                    </TextBox>
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="操作日志" Style="{StaticResource SectionHeader}" />
+            <ListBox ItemsSource="{Binding LogLines}" Height="160" FontFamily="Consolas" FontSize="12" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

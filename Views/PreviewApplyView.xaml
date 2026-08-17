@@ -1,0 +1,112 @@
+<UserControl x:Class="DnsRouteUI.Views.PreviewApplyView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:DnsRouteUI.Models"
+             Background="White">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolVis" />
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="16">
+            <TextBlock Text="变更预览与应用" Style="{StaticResource SectionHeader}" FontSize="18" />
+            <TextBlock Text="规格第 5.5、9 节：应用前展示差异，导出脚本或创建备份并应用。" Foreground="#666" Margin="0,0,0,12" />
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                <Button Content="生成预览" Command="{Binding GeneratePreviewCommand}" />
+                <Button Content="查询当前托管对象" Command="{Binding QueryCurrentManagedObjectsCommand}" Background="#0063B1" Foreground="White" />
+                <Button Content="复制诊断命令" Command="{Binding CopyDiagnosticCommandsCommand}" />
+                <Button Content="导出应用脚本" Command="{Binding ExportScriptCommand}" />
+                <Button Content="导出回滚脚本" Command="{Binding ExportRollbackScriptCommand}" />
+                <Button Content="创建备份并应用" Command="{Binding ApplyCommand}" Background="#1B7F3B" Foreground="White" FontWeight="Bold" />
+            </StackPanel>
+
+            <TextBlock Text="{Binding StatusMessage}" Foreground="#1B4F7A" Margin="0,0,0,8" />
+
+            <!-- 变更预览列表 -->
+            <TextBlock Text="变更预览项" Style="{StaticResource SectionHeader}" />
+            <DataGrid ItemsSource="{Binding PreviewItems}" AutoGenerateColumns="False" CanUserAddRows="False"
+                      IsReadOnly="True" Height="200" BorderBrush="#DDD" BorderThickness="1">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="操作" Binding="{Binding Action}" Width="70" />
+                    <DataGridTextColumn Header="类型" Binding="{Binding Type}" Width="140" />
+                    <DataGridTextColumn Header="名称" Binding="{Binding Name}" Width="240" />
+                    <DataGridTextColumn Header="详情" Binding="{Binding Detail}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- 当前托管对象查询结果（应用后直接在这里验证） -->
+            <Border Margin="0,12,0,0" Background="#FFF9E6" BorderBrush="#E6C200" BorderThickness="1" CornerRadius="4">
+                <Expander Header="★ 当前托管对象（应用后立即显示，用于验证 Get-DnsServer* 结果）" IsExpanded="True" Padding="4">
+                    <DockPanel Margin="4">
+                        <TextBlock DockPanel.Dock="Top" Margin="0,0,0,6" Foreground="#806000" FontSize="11"
+                               Text="注意：Get-DnsServerQueryResolutionPolicy 必须加 -ZoneName '..cache' 才能看到缓存分流策略；不加该参数仅显示服务器级策略。" TextWrapping="Wrap" />
+                        <TextBox Text="{Binding CurrentManagedObjectsText, Mode=OneWay}" IsReadOnly="True"
+                             FontFamily="Consolas" FontSize="12" Height="260"
+                             VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                             TextWrapping="NoWrap" Background="White" />
+                    </DockPanel>
+                </Expander>
+            </Border>
+
+            <!-- 执行输出面板 -->
+            <Expander Header="最近一次 PowerShell 执行输出（stdout + stderr）" Margin="0,12,0,0">
+                <TextBox Text="{Binding LastExecutionOutput, Mode=OneWay}" IsReadOnly="True"
+                         FontFamily="Consolas" FontSize="12" Height="200"
+                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                         TextWrapping="NoWrap" />
+            </Expander>
+
+            <!-- 预览文本 -->
+            <Expander Header="预览文本（可读格式）" Margin="0,12,0,0">
+                <TextBox Text="{Binding PreviewText, Mode=OneWay}" IsReadOnly="True"
+                         FontFamily="Consolas" FontSize="12" Height="180"
+                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
+            </Expander>
+
+            <!-- 生成的脚本 -->
+            <Expander Header="生成的 PowerShell 应用脚本" Margin="0,12,0,0">
+                <TextBox Text="{Binding GeneratedScript, Mode=OneWay}" IsReadOnly="True"
+                         FontFamily="Consolas" FontSize="12" Height="240"
+                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                         TextWrapping="NoWrap" />
+            </Expander>
+
+            <!-- 诊断命令参考 -->
+            <Expander Header="诊断命令参考（可复制到 PowerShell 手动执行）" Margin="0,12,0,0">
+                <TextBox Text="{Binding DiagnosticCommands, Mode=OneWay}" IsReadOnly="True"
+                         FontFamily="Consolas" FontSize="12" Height="260"
+                         VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
+                         TextWrapping="NoWrap" />
+            </Expander>
+
+            <!-- 最近应用结果 -->
+            <TextBlock Text="最近一次应用结果" Style="{StaticResource SectionHeader}" Margin="0,12,0,0" />
+            <Border BorderBrush="#DDD" BorderThickness="1" CornerRadius="4" Padding="12">
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding LastResult}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    <TextBlock>
+                        <Run Text="结果：" FontWeight="Bold" />
+                        <Run Text="{Binding LastResult.Summary, Mode=OneWay}" />
+                    </TextBlock>
+                    <TextBlock Margin="0,4,0,0">
+                        <Run Text="开始：" />
+                        <Run Text="{Binding LastResult.StartedAt, Mode=OneWay}" />
+                        <Run Text="  结束：" />
+                        <Run Text="{Binding LastResult.FinishedAt, Mode=OneWay}" />
+                    </TextBlock>
+                    <TextBlock Margin="0,4,0,0" Text="{Binding LastResult.ScriptPath, StringFormat=脚本: {0}, TargetNullValue=脚本: 无}" />
+                    <TextBlock Margin="0,4,0,0" Text="{Binding LastResult.SnapshotPath, StringFormat=快照: {0}, TargetNullValue=快照: 无}" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

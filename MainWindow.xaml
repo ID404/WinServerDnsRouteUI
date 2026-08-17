@@ -1,0 +1,70 @@
+<Window x:Class="DnsRouteUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:DnsRouteUI.ViewModels"
+        Title="DnsRouteUI - Windows DNS 分流与缓存隔离管理工具"
+        Height="720" Width="1180"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F6F8">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- 左侧导航 -->
+        <Border Grid.Column="0" Background="#2B3447">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="DnsRouteUI"
+                           Foreground="White" FontSize="18" FontWeight="Bold"
+                           Margin="16,18,16,12" />
+                <TextBlock DockPanel.Dock="Top" Text="Windows DNS 分流管理"
+                           Foreground="#9CA8BD" FontSize="11"
+                           Margin="16,0,16,16" />
+
+                <ListBox ItemsSource="{Binding Modules}"
+                         SelectedItem="{Binding SelectedModule}"
+                         BorderThickness="0" Background="Transparent"
+                         Margin="0,0,0,8">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="16,10" />
+                            <Setter Property="Foreground" Value="#C7D0DE" />
+                            <Setter Property="FontSize" Value="13" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="Bd" Background="Transparent" Padding="{TemplateBinding Padding}">
+                                            <ContentPresenter VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="#3A465C" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="#4C8DCE" />
+                                                <Setter Property="Foreground" Value="White" />
+                                                <Setter Property="FontWeight" Value="Bold" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayName}" />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <!-- 右侧内容区：根据选中模块自动选择 DataTemplate -->
+        <Grid Grid.Column="1" Margin="0">
+            <ContentControl Content="{Binding SelectedModule}" Margin="0" />
+        </Grid>
+    </Grid>
+</Window>
